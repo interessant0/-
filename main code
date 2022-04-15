@@ -1,0 +1,120 @@
+#define _CRT_SECURE_NO_WARNINGS 1
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+#include <windows.h>
+#define ROW 8
+#define COL 8
+#define STYLE '?'
+#define NUM 10   //埋雷的个数
+void SetMines(char board[][COL], int row, int col)          //埋雷
+{
+ int count = NUM;
+ while (count){
+  int x = rand() % (row - 2) + 1;
+  int y = rand() % (col - 2) + 1;
+  if (board[x][y] == '0'){
+   board[x][y] = '1';
+   count--;
+  }
+ }
+}
+ 
+void ShowLine(int col)        //格子的横线
+{
+ for (int i = 0; i <= (col - 2); i++){
+  printf("----");
+ }
+ printf("\n");
+}
+ 
+void ShowBoard(char board[][COL], int row, int col)         //格子的竖线
+{
+ printf("     ");
+ for (int i = 1; i <= (col - 2); i++){
+  printf("%d   ", i);
+ }
+ printf("\n");
+ ShowLine(col);
+ for (int i = 1; i <= (row - 2); i++){
+  printf("%-3d|", i);
+  for (int j = 1; j <= (col - 2); j++){
+   printf(" %c |", board[i][j]);
+  }
+  printf("\n");
+  ShowLine(col);
+ }
+}
+ 
+char CountMines(char board[][COL], int x, int y)            //计算雷的个数
+{
+ return board[x - 1][y - 1] + board[x - 1][y] + board[x - 1][y + 1] + \
+  board[x][y + 1] + board[x + 1][y + 1] + board[x + 1][y] + \
+  board[x + 1][y - 1] + board[x][y - 1] - 7 * '0';
+}
+ 
+void Game()
+{
+ srand((unsigned long)time(NULL));
+ char show_board[ROW][COL];
+ char mine_board[ROW][COL];
+ memset(show_board, STYLE, sizeof(show_board));      //复制字符STYLE到参数所指向的字符串的前sizeof(show_board)个字符
+ memset(mine_board, '0', sizeof(mine_board));        //复制字符0到参数所指向的字符串的前sizeof(mine_board)个字符
+ SetMines(mine_board, ROW, COL);
+ int count = (ROW - 2)*(COL - 2) - NUM;
+ while (count){
+  system("cls");
+  ShowBoard(show_board, ROW, COL);
+  printf("Please Enter Your Postion<x,y>:");
+  int x = 0;
+  int y = 0;
+  scanf("%d %d", &x, &y);
+  if (x < 1 || x > ROW-2 || y < 1 || y > COL-2){             //判断输入坐标是否合法
+   printf("Postion Error!\n");
+   continue;
+  }
+  if (show_board[x][y] != STYLE){                            //判断输入坐标是否已被占用
+   printf("Postion Is not *\n");
+   continue;
+  }
+  if (mine_board[x][y] == '1'){                              //判断用户输入坐标是否为雷坐标
+   printf("game over!\n");
+   ShowBoard(mine_board, ROW, COL);
+   break;
+  }
+  show_board[x][y] = CountMines(mine_board, x, y);
+  count--;
+ }
+ 
+}
+void Menu()
+{
+ printf("########################\n");
+ printf("# 1. Play       0.Exit #\n");
+ printf("########################\n");
+}
+ 
+int main()
+{
+ int quit = 0;
+ int select = 0;
+ while (!quit){
+  Menu();
+  printf("Please Enter 1 or 0 :");
+  scanf("%d", &select);
+  switch (select){
+  case 1:
+   Game();
+   break;
+  case 0:
+   quit = 1;
+   break;
+  default:
+   printf("Postion Error, Try Again!\n");
+   break;
+  }
+ }
+ printf("You are welcomed to come back next time to play!\n");
+ system("pause");
+ return 0;
+}
